@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <bean class="org.mycompany.MyProcessor" id="myProcessor"/>
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+        <!-- 
+        <endpoint id="request" uri="dozer:request?sourceModel=rpp_1567738525160.BusMsg&amp;targetModel=request.Request&amp;marshalId=transform-json&amp;unmarshalId=rpp_1567738525160&amp;mappingFile=transformation.xml"/>
+        <dataFormats>
+            <jaxb contextPath="rpp_1567738525160" id="rpp_1567738525160"/>
+            <json id="transform-json" library="Jackson"/>
+        </dataFormats>
+ -->
+        <endpoint id="requesttx" uri="dozer:requesttx?sourceModel=rpp_1568038886373.BusMsg&amp;targetModel=request.Request&amp;marshalId=transform-json&amp;unmarshalId=rpp_1568038886373&amp;mappingFile=transformation-req.xml"/>
+        <dataFormats>
+            <json id="transform-json" library="Jackson"/>
+            <jaxb contextPath="rpp_1568038886373" id="rpp_1568038886373"/>
+        </dataFormats>
+        <route id="netty4-producer-test">
+            <from id="route-timer-test" uri="timer://foo?period=2m"/>
+            <setBody id="route-setBody">
+                <simple>Hello World from camel-context.xml</simple>
+            </setBody>
+            <log id="route-log" message="At the beginning of test client >>>"/>
+            <to id="_to1" uri="netty4:tcp://localhost:5021"/>
+            <log id="_log2" message="At the end of netty producer >>> ${body}"/>
+            <!-- 
+            <to id="_to2" uri="ref:request"/>
+            <log id="_log3" message="After transformation >>> ${body}"/>
+            -->
+            <to id="_to2" uri="ref:requesttx"/>
+            <log id="_log3" message="After transformation >>> ${body}"/>
+        </route>
+        <!--
+        <route id="netty4-consumer">
+            <from id="_from1" uri="netty4:tcp://0.0.0.0:5021"/>
+            <log id="_log9" message=">>> In the beginning of netty4-consumer"/>
+            <pollEnrich id="_pollEnrich1">
+                <constant>file:src/main/resources/input?fileName=tcpip_response.xml&amp;noop=true&amp;idempotent=false</constant>
+            </pollEnrich>
+            <process id="_process1" ref="myProcessor"/>
+            <log id="_log1" message=">>> After pollEnrich and return with >>> ${body}"/>
+        </route>
+      -->
+    </camelContext>
+</beans>
